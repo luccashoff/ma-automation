@@ -1,0 +1,21 @@
+[LOGIN]
+email = luccashoff@gmail.com
+senha = Palio2012vermelho
+
+[AJUSTES]
+valor_entrada = 1
+tipo = automatico
+stop_win = 10
+stop_loss = 4
+analise_medias = S
+velas_medias = 15
+
+[MARTINGALE]
+usar_martingale = S
+niveis_martingale = 1
+fator_martingale = 1.5
+
+[SOROS]
+usar_soros = N
+niveis_soros = 2
+
