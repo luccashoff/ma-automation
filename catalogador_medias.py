@@ -119,12 +119,25 @@ def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch
             next_close = float(velas_analisadas[j + len(velas_analisadas) - len(ma_values) + 1]['close'])
             ma_value = ma_values[j]
 
-            if current_close > ma_value and next_close < ma_value:
+            # Mensagens de depuração
+            #print(f"Vela {j + 1}:")
+            #print(f" - Preço de Fechamento: {current_close}")
+            #print(f" - Média Móvel ({ma_function.__name__.replace('calculate_', '').upper()}): {ma_value}")
+
+            # Verificação da tendência e resultados
+            if current_close > ma_value:
+                trend = 'CALL'
+            else:
+                trend = 'PUT'
+
+           # print(f" - Tendência Prevista: {trend}")
+
+            if (trend == 'CALL' and next_close > current_close) or (trend == 'PUT' and next_close < current_close):
                 win += 1
-            elif current_close < ma_value and next_close > ma_value:
-                win += 1
+                #print(" - Resultado: Win")
             else:
                 loss += 1
+                #print(" - Resultado: Loss")
 
         win_total += win
         loss_total += loss
@@ -141,6 +154,7 @@ def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch
     print(f"Total de velas analisadas: {velas_analisadas_total}\n")
 
     return [par, win_total, loss_total, assertividade_total, velas_analisadas_total]
+
 
 # Filtrar ativos que não são OTC (digitais)
 all_assets = API.get_all_open_time()
