@@ -81,8 +81,6 @@ else:
         print(reason)
         sys.exit()
 
-# ...
-
 # Função para realizar a análise em lotes de 1000 velas com a média móvel escolhida
 def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch_size, velas_analisadas_dict, ma_function, ma_period):
     win_total = 0
@@ -119,25 +117,16 @@ def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch
             next_close = float(velas_analisadas[j + len(velas_analisadas) - len(ma_values) + 1]['close'])
             ma_value = ma_values[j]
 
-            # Mensagens de depuração
-            #print(f"Vela {j + 1}:")
-            #print(f" - Preço de Fechamento: {current_close}")
-            #print(f" - Média Móvel ({ma_function.__name__.replace('calculate_', '').upper()}): {ma_value}")
-
             # Verificação da tendência e resultados
             if current_close > ma_value:
                 trend = 'CALL'
             else:
                 trend = 'PUT'
 
-           # print(f" - Tendência Prevista: {trend}")
-
             if (trend == 'CALL' and next_close > current_close) or (trend == 'PUT' and next_close < current_close):
                 win += 1
-                #print(" - Resultado: Win")
             else:
                 loss += 1
-                #print(" - Resultado: Loss")
 
         win_total += win
         loss_total += loss
