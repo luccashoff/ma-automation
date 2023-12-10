@@ -93,9 +93,9 @@ def check_mhi_trend(velas):
         cores = vela1, vela2, vela3
 
         if cores.count('Verde') > cores.count('Vermelha') and cores.count('Doji') == 0:
-            mhi_trend = 'Verde'
-        elif cores.count('Vermelha') > cores.count('Verde') and cores.count('Doji') == 0:
             mhi_trend = 'Vermelha'
+        elif cores.count('Vermelha') > cores.count('Verde') and cores.count('Doji') == 0:
+            mhi_trend = 'Verde'
     except:
         pass
 
