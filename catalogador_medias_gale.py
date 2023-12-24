@@ -135,17 +135,15 @@ def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch
                     entrada = None  # Se Entrada1 for Win, não haverá Gale
                 else:
                     entrada = 2  # Se Entrada1 for Loss, faz Gale
-                    #print(f"Gale: Executando próxima operação com lote 2")
                     gale += 1  # Conta o Gale
             elif entrada == 2:
                 # Entrada 2 (Gale)
-                if (trend == 'CALL' and next_close > current_close):
+                if (trend == 'CALL' and next_close > current_close) or (trend == 'PUT' and next_close < current_close):
                     win += 1
                     entrada = None  # Se Entrada2 for Win, não haverá nova entrada
-                elif (trend == 'PUT' and next_close < current_close):
+                else:
                     loss += 1
                     entrada = None  # Se Entrada2 for Loss, não haverá nova entrada
-                    #print(f"Loss: Executando próxima operação com lote 2")
 
             # Contagem de Doji
             if trend == 'Doji':
@@ -158,7 +156,8 @@ def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch
 
     # Verifica se houve pelo menos uma operação antes de calcular a assertividade
     if win_total + gale_total + loss_total > 0:
-        assertividade_total = round((win_total + gale_total) / (win_total + gale_total + loss_total) * 100, 2)
+        #assertividade_total = round((win_total + gale_total) / (win_total + gale_total + loss_total) * 100, 2)
+        assertividade_total = round((win_total) / (win_total + loss_total) * 100, 2)
     else:
         assertividade_total = 0.0
 

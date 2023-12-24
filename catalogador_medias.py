@@ -3,6 +3,15 @@ from configobj import ConfigObj
 from tabulate import tabulate
 import time
 import sys
+import random
+
+# Função para calcular a média móvel aleatória (RMA)
+def calculate_rma(velas, n):
+    rma = []
+    for i in range(n, len(velas)):
+        random_trend = random.choice(['CALL', 'PUT'])
+        rma.append(random_trend)
+    return rma
 
 # Função para calcular a média móvel simples (SMA)
 def calculate_sma(velas, n):
@@ -17,12 +26,10 @@ def calculate_sma(velas, n):
 def calculate_wma(velas, n):
     wma = []
     weights = list(range(1, n + 1))
-
     for i in range(n, len(velas)):
         close_prices = [float(vela['close']) for vela in velas[i - n:i]]
         wma_value = sum(w * close for w, close in zip(weights, close_prices)) / sum(weights)
         wma.append(wma_value)
-
     return wma
 
 # Função para calcular a média móvel exponencial (EMA)
@@ -30,11 +37,9 @@ def calculate_ema(velas, n):
     ema = []
     alpha = 2 / (n + 1)
     ema_value = sum(float(vela['close']) for vela in velas[:n]) / n
-
     for i in range(n, len(velas)):
         ema_value = alpha * float(velas[i]['close']) + (1 - alpha) * ema_value
         ema.append(ema_value)
-
     return ema
 
 # Função para calcular a média móvel Poisson (PMA)
@@ -44,7 +49,6 @@ def calculate_pma(velas, n):
         close_prices = [float(vela['close']) for vela in velas[i - n:i]]
         pma_value = sum(p * close for p, close in zip(range(1, n + 1), close_prices)) / sum(range(1, n + 1))
         pma.append(pma_value)
-
     return pma
 
 # Função para calcular a média móvel harmônica (HMA)
@@ -57,7 +61,6 @@ def calculate_hma(velas, n):
         close_prices = [float(vela['close']) for vela in velas[i - n:i]]
         hma_value = weights_sum / sum(w / close for w, close in zip(weights, close_prices))
         hma.append(hma_value)
-
     return hma
 
 # Configurações
@@ -115,7 +118,14 @@ def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch
         for j in range(len(ma_values) - 1):
             current_close = float(velas_analisadas[j + len(velas_analisadas) - len(ma_values)]['close'])
             next_close = float(velas_analisadas[j + len(velas_analisadas) - len(ma_values) + 1]['close'])
-            ma_value = ma_values[j]
+            
+            if isinstance(ma_values[j], float):
+                ma_value = float(ma_values[j])
+                random_trend = 'CALL' if random.random() < 0.5 else 'PUT'
+            else:
+                # Se ma_values[j] não for float, então é uma string ('CALL' ou 'PUT')
+                ma_value = 0.0  # Valor padrão para strings
+                random_trend = ma_values[j]
 
             # Verificação da tendência e resultados
             if current_close > ma_value:
@@ -150,7 +160,7 @@ all_assets = API.get_all_open_time()
 pares_nao_otc = [par for par in all_assets['digital'] if 'OTC' not in par]
 
 # Agora, ao escolher o tipo de média móvel desejada, basta chamar a função correspondente
-ma_type = input("Escolha o tipo de média móvel (SMA, WMA, EMA, PMA, HMA): ").upper()
+ma_type = input("Escolha o tipo de média móvel (SMA, WMA, EMA, PMA, HMA, RMA): ").upper()
 
 if ma_type == "SMA":
     ma_function = calculate_sma
@@ -162,6 +172,8 @@ elif ma_type == "PMA":
     ma_function = calculate_pma
 elif ma_type == "HMA":
     ma_function = calculate_hma
+elif ma_type == "RMA":
+    ma_function = calculate_rma
 else:
     print("Tipo de média móvel inválido. Utilizando SMA por padrão.")
     ma_function = calculate_sma
