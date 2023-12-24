@@ -57,7 +57,6 @@ def calculate_hma(velas, n):
         close_prices = [float(vela['close']) for vela in velas[i - n:i]]
         hma_value = weights_sum / sum(w / close for w, close in zip(weights, close_prices))
         hma.append(hma_value)
-
     return hma
 
 # Configurações
@@ -87,83 +86,72 @@ def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch
     gale_total = 0
     loss_total = 0
     velas_analisadas_total = 0
+    doji = 0  # Adiciona a inicialização da variável doji
 
     print(f"Iniciando análise de velas para o par {par} com média móvel {ma_function.__name__.replace('calculate_', '').upper()} ({ma_period} períodos)")
 
     for i in range(0, total_candles, batch_size):
         try:
             endtime = time.time()
-            # Ajuste na chamada da função get_candles
             velas = API.get_candles(par, timeframe, batch_size, endtime=endtime)
         except Exception as e:
             print(f"Erro ao recuperar velas para {par}: {e}")
             continue
 
-        # Ajuste para garantir que estamos considerando as últimas 1000 velas
         if i + batch_size <= total_candles:
-            # Define o intervalo de velas a ser analisado
             velas_analisadas = velas
         else:
-            # Ajusta o intervalo para as últimas 1000 velas disponíveis
             velas_analisadas = velas[-batch_size:]
 
-        velas_analisadas_total += len(velas_analisadas)  # Correção aqui
+        velas_analisadas_total += len(velas_analisadas)
 
-        # Restante da lógica permanece igual
         ma_values = ma_function(velas_analisadas, ma_period)
 
         win = 0
         gale = 0
         loss = 0
-        entrada = None  # Variável para indicar o tipo de entrada (1: Entrada normal, 2: Gale)
-
+        entrada = None
         for j in range(len(ma_values) - 1):
             current_close = float(velas_analisadas[j + len(velas_analisadas) - len(ma_values)]['close'])
             next_close = float(velas_analisadas[j + len(velas_analisadas) - len(ma_values) + 1]['close'])
             ma_value = ma_values[j]
 
-            # Verificação da tendência e resultados
             if current_close > ma_value:
                 trend = 'CALL'
             else:
                 trend = 'PUT'
 
             if entrada is None:
-                # Entrada normal (Entrada1)
                 if (trend == 'CALL' and next_close > current_close) or (trend == 'PUT' and next_close < current_close):
                     win += 1
-                    entrada = None  # Se Entrada1 for Win, não haverá Gale
+                    entrada = None
                 else:
-                    entrada = 2  # Se Entrada1 for Loss, faz Gale
-                    gale += 1  # Conta o Gale
+                    entrada = 2
+                    gale += 1
             elif entrada == 2:
-                # Entrada 2 (Gale)
                 if (trend == 'CALL' and next_close > current_close) or (trend == 'PUT' and next_close < current_close):
                     win += 1
-                    entrada = None  # Se Entrada2 for Win, não haverá nova entrada
+                    entrada = None
                 else:
                     loss += 1
-                    entrada = None  # Se Entrada2 for Loss, não haverá nova entrada
+                    entrada = None
 
-            # Contagem de Doji
             if trend == 'Doji':
                 doji += 1
 
-        # Acumula os resultados de Win, Gale e Loss
         win_total += win
         gale_total += gale
         loss_total += loss
 
-    # Verifica se houve pelo menos uma operação antes de calcular a assertividade
     if win_total + gale_total + loss_total > 0:
-        #assertividade_total = round((win_total + gale_total) / (win_total + gale_total + loss_total) * 100, 2)
         assertividade_total = round((win_total) / (win_total + loss_total) * 100, 2)
     else:
         assertividade_total = 0.0
 
     print(f"Análise para o par {par} concluída. Resultados:")
     print(f"Wins: {win_total}, Gale: {gale_total}, Loss: {loss_total}, Assertividade: {assertividade_total}%")
-    print(f"Total de velas analisadas: {velas_analisadas_total}\n")
+    print(f"Total de velas analisadas: {velas_analisadas_total}")
+    print(f"Total de velas Doji: {doji}\n")
 
     return [par, win_total, gale_total, loss_total, assertividade_total, velas_analisadas_total]
 
