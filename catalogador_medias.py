@@ -5,13 +5,13 @@ import time
 import sys
 import random
 
-# Função para calcular a média móvel aleatória (RMA)
-def calculate_rma(velas, n):
-    rma = []
+# Função para calcular a tendência aleatória (Random)
+def calculate_random(velas, n):
+    random = []
     for i in range(n, len(velas)):
         random_trend = random.choice(['CALL', 'PUT'])
-        rma.append(random_trend)
-    return rma
+        random.append(random_trend)
+    return random
 
 # Função para calcular a média móvel simples (SMA)
 def calculate_sma(velas, n):
@@ -160,7 +160,7 @@ all_assets = API.get_all_open_time()
 pares_nao_otc = [par for par in all_assets['digital'] if 'OTC' not in par]
 
 # Agora, ao escolher o tipo de média móvel desejada, basta chamar a função correspondente
-ma_type = input("Escolha o tipo de média móvel (SMA, WMA, EMA, PMA, HMA, RMA): ").upper()
+ma_type = input("Escolha o tipo de média móvel (SMA, WMA, EMA, PMA, HMA, RANDOM): ").upper()
 
 if ma_type == "SMA":
     ma_function = calculate_sma
@@ -172,8 +172,8 @@ elif ma_type == "PMA":
     ma_function = calculate_pma
 elif ma_type == "HMA":
     ma_function = calculate_hma
-elif ma_type == "RMA":
-    ma_function = calculate_rma
+elif ma_type == "RANDOM":
+    ma_function = calculate_random
 else:
     print("Tipo de média móvel inválido. Utilizando SMA por padrão.")
     ma_function = calculate_sma
