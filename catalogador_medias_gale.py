@@ -111,6 +111,7 @@ def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch
         gale = 0
         loss = 0
         entrada = None
+        
         for j in range(len(ma_values) - 1):
             current_close = float(velas_analisadas[j + len(velas_analisadas) - len(ma_values)]['close'])
             next_close = float(velas_analisadas[j + len(velas_analisadas) - len(ma_values) + 1]['close'])
@@ -150,8 +151,7 @@ def analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch
 
     print(f"Análise para o par {par} concluída. Resultados:")
     print(f"Wins: {win_total}, Gale: {gale_total}, Loss: {loss_total}, Assertividade: {assertividade_total}%")
-    print(f"Total de velas analisadas: {velas_analisadas_total}")
-    print(f"Total de velas Doji: {doji}\n")
+    print(f"Total de velas analisadas: {velas_analisadas_total}\n")
 
     return [par, win_total, gale_total, loss_total, assertividade_total, velas_analisadas_total]
 
@@ -194,4 +194,4 @@ for par in pares_nao_otc:
     all_results.append(analyze_candles_in_batches_with_ma(API, par, timeframe, total_candles, batch_size, velas_analisadas_dict, ma_function, ma_period))
 
 # Exibe os resultados
-print(tabulate(all_results, headers=['PAR', 'GALE', 'WINS', 'LOSS', 'ASSERTIVIDADE', 'VELAS ANALISADAS TOTAL']))
+print(tabulate(all_results, headers=['PAR', 'WINS', 'GALE', 'LOSS', 'ASSERTIVIDADE', 'VELAS ANALISADAS TOTAL']))
